@@ -1,5 +1,3 @@
-
-
 from langchain_openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -12,23 +10,27 @@ from third_party.linkedin import scrape_linkedin_profile
 import streamlit as st
 from typing import Union
 
-from langchain import hub 
+from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
-from langchain_openai import OpenAI 
+from langchain_openai import OpenAI
 
 from ice_breaker import icebreaker
 
 load_dotenv()
+
+
 def generate_response(input_text):
-    tools=[icebreaker]
+    tools = [icebreaker]
     prompt = hub.pull("hwchase17/react")
+    prompt += "\n Do not summarize or condense the response, simply reformat the response to make it look better readable. "
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
-    agent = create_react_agent(llm,tools,prompt)
+    agent = create_react_agent(llm, tools, prompt)
 
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True,handle_parsing_errors=True)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
     res = agent_executor.invoke({"input": input_text})
     return res.get("output")
+
 
 st.title("QUICK START APP🗣️")
 with st.form("my_form", clear_on_submit=True):
