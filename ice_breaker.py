@@ -4,6 +4,7 @@ from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from agents.linkedin_lookup_agent import lookup as linkedin_lookup_agent
+from agents.tavily_lookup_agent import lookup as tavily_lookup_agent
 from third_party.linkedin import scrape_linkedin_profile
 from langchain.tools import tool
 
@@ -11,8 +12,7 @@ from langchain.tools import tool
 @tool
 def icebreaker(name: str) -> str:
     """Used to search information about people and creates a summary in the format of the summary template."""
-    linkedin_profile_url = linkedin_lookup_agent(name=name)
-    # linkedin_data = scrape_linkedin_profile(linkedin_profile_url=linkedin_profile_url)
+    linkedin_profile_url = tavily_lookup_agent(name=name)
     print(linkedin_profile_url)
 
     summary_template = """
@@ -36,9 +36,3 @@ def icebreaker(name: str) -> str:
     result = chain.invoke({"information": linkedin_profile_url})
     print(result)
     return result
-
-# if __name__ == "__main__":
-#     load_dotenv()
-#     name = "Pradeep Atrey"
-#     res = icebreaker(name=name)
-#     print(res)
