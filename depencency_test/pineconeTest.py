@@ -22,7 +22,7 @@ if __name__ == '__main__':
     #Load in the text document
     print("Vector Store")
     #Users must change Textloader to their respective File paths
-    loader=TextLoader("/Users/Manny/OneDrive/Desktop/GenAIAssistant/depencency_test/TestFiles/mediumblog1.txt",encoding="utf8")
+    loader=TextLoader("/Users/mafon/Desktop/GenAIAssistant/depencency_test/TestFiles/mediumblog1.txt",encoding="utf8")
     document=loader.load()
 
     #split the texts into its specific czhunks
