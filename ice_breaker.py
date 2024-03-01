@@ -1,11 +1,11 @@
 import os
-from dotenv import load_dotenv
+
 from langchain.chains import LLMChain
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from agents.linkedin_lookup_agent import lookup as linkedin_lookup_agent
-from third_party.linkedin import scrape_linkedin_profile
 from langchain.tools import tool
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+
+from agents.linkedin_lookup_agent import lookup as linkedin_lookup_agent
 
 
 @tool

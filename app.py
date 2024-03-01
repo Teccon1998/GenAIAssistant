@@ -1,28 +1,20 @@
-from langchain_openai import OpenAI
-import os
+import streamlit as st
 from dotenv import load_dotenv
-from langchain.chains import LLMChain
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-import streamlit as st
-from agents.linkedin_lookup_agent import lookup as linkedin_lookup_agent
-from third_party.linkedin import scrape_linkedin_profile
-import streamlit as st
-from typing import Union
-
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_openai import OpenAI
 
 from ice_breaker import icebreaker
 
+from agents.twitter_tweets_agent import get_tweets
+
 load_dotenv()
 
 
 def generate_response(input_text):
-    tools = [icebreaker]
-    prompt = hub.pull("hwchase17/react")
-    prompt += "\n Do not summarize or condense the response, simply reformat the response to make it look better readable. "
+    tools = [get_tweets(input_text)]
+    prompt = hub.pull("elijuwon/interest_generator")
+    # prompt += "\n Do not summarize or condense the response, simply reformat the response to make it look better readable. "
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
     agent = create_react_agent(llm, tools, prompt)
