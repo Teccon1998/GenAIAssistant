@@ -5,7 +5,7 @@ import streamlit as st
 
 def check_credentials(username, password):
     # MongoDB connection URI
-    uri = "mongodb+srv://elijuwonjmitchell:Abaiba%4012@cluster0.59qhs8a.mongodb.net/?retryWrites=true&w=majority"
+    uri = "URI_FOR_Mongo"
 
     # Create a new client and connect to the server
     client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",

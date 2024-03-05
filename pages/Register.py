@@ -6,7 +6,7 @@ from pymongo.server_api import ServerApi
 
 def connect_with_server(username, password):
     # Send a ping to confirm a successful connection
-    uri = "mongodb+srv://elijuwonjmitchell:Abaiba%4012@cluster0.59qhs8a.mongodb.net/?retryWrites=true&w=majority"
+    uri = "URI_FOR_Mongo"
 
     # Create a new client and connect to the server
     client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",
