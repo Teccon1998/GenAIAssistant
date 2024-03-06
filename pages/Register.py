@@ -2,11 +2,15 @@ import streamlit as st
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def connect_with_server(username, password):
     # Send a ping to confirm a successful connection
-    uri = "URI_FOR_Mongo"
+    uri = os.environ.get('URI_FOR_Mongo')
 
     # Create a new client and connect to the server
     client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",
