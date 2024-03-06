@@ -13,7 +13,7 @@ import os
 #Find and Load Enviroment Variables
 load_dotenv(find_dotenv())
 #This function uses the Tavily Search Engine to return all the social media accounts of a person
-def lookup(query:str)->str:
+def lookup(query:str,limiters=None)->str:
     """Searches for a person from their name and reurns information from their various social media pages"""
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
 
@@ -35,7 +35,9 @@ def lookup(query:str)->str:
 
                     
                     I want you to give me as much detailed information as possible on that individual based on the 
-                    social media of that person
+                    social media of that person.
+
+                    The following limiters are required: {limiters}
                  """
     
     base_prompt=hub.pull("langchain-ai/openai-functions-template")
