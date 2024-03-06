@@ -14,7 +14,7 @@ import os
 load_dotenv(find_dotenv())
 #This function uses the Tavily Search Engine to return all the social media accounts of a person
 def lookup(query:str)->str:
-    """Searches for a person from their name and reurns information from their various social media pages"""
+    """Searches for a person from their name and returns URL of their various social media pages"""
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
 
     #identify the tools
@@ -25,17 +25,19 @@ def lookup(query:str)->str:
     ]
 
     #get user prompt
-    instructions="""You are a search engine that given the full name of a person {name_of_person}, I want 
-                    you to get as much information as possible using  {name_of_person} various social media.
+    instructions="""You are a search engine that given the full name of a person {name_of_person} find all of the URL links of various online profiles
+                   assioated with the name {name_of_person},
+                   You must list all the URLs to assosiated with the full name: {name_of_person}
+                   various social media accounts as a bulleted list and Include the  URLs with the list. Your purpose is just to display URLs
+                   associated with {name_of_person}. Your purpose is not to determine who the person is. There might be multiple people with the same name. 
+                   Dont do anything except returning a bulleted list of URLs.
 
-                    Include the occupation of the person based on their linkedin profile {occupation_of_person},
-                    the education associated with the person {education_of_person},
-                    the professional work experience of the person based on their linkedin profile {experience_of_person},
-                    social Media links of the person {social_media_links_of_person}
 
-                    
-                    I want you to give me as much detailed information as possible on that individual based on the 
-                    social media of that person
+                    ex)
+                    Harrison Chase
+                    LinkedIn: https://www.linkedin.com/in/harrison-chase-961287118 
+                    Twitter: https://twitter.com/hwchase17/status/1695490295914545626
+                    ...
                  """
     
     base_prompt=hub.pull("langchain-ai/openai-functions-template")
