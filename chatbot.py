@@ -7,6 +7,9 @@ from dotenv import load_dotenv,find_dotenv
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain import hub
 
+#Agent Tools
+from tools.tavily_lookup_tool import tavilySearchTool
+
 # frontend tool 
 import streamlit as st
 from streamlit_chat import message
@@ -34,7 +37,7 @@ def conversationHandler(userInput):
     return conversation
 
 def generate_response(query):
-    tools = []
+    tools = [tavilySearchTool]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
@@ -50,7 +53,7 @@ def generate_response(query):
 #USER INTERFACE
 st.header("AI Chat Assistant")
 prompt=st.text_input("Prompt", placeholder="Enter your message")
-#check for previouse user prompts.
+#check for previouse user prompts with Streamlit Session States.
 if "user_prompt_history" not in st.session_state:
     st.session_state["user_prompt_history"]=[]
 
@@ -63,14 +66,15 @@ if prompt:
         response=generate_response(prompt)
         #Variable that will be displayed to the user when
         formated_response=(
-            f"{response['result']}"
+            f"{response}"
         )
-
+        #update the session state with user input and the generated response
         st.session_state["user_prompt_history"].append(prompt)
         st.session_state["chat_message_history"].append(formated_response)
 
 #if the streamlit session state is not empty. Output responses
 if st.session_state["chat_message_history"]:
     for response, user_query in zip(st.session_state["chat_message_history"],st.session_state["user_prompt_history"]):
+        #display user query and generated response
         message(user_query,is_user=True)
         message(response)
