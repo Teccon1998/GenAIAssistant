@@ -1,9 +1,12 @@
 #This file will implement the chatbot feature
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI,OpenAI
 from langchain.chains import ConversationChain
 from langchain_openai import ChatOpenAI
-from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain.memory import ConversationTokenBufferMemory
 from dotenv import load_dotenv,find_dotenv 
+from langchain.agents import AgentExecutor, create_react_agent
+from langchain import hub
+
 # frontend tool 
 import streamlit as st
 from streamlit_chat import message
@@ -30,10 +33,22 @@ def conversationHandler(userInput):
     conversation=conversation_with_summary.predict(input=userInput)
     return conversation
 
-#Chat Interface
-st.header("AI Chat Assistant")
+def generate_response(query):
+    tools = []
+    prompt = hub.pull("hwchase17/react")
+    print("PROMPT: " + str(prompt))
+    llm = OpenAI()
+    agent = create_react_agent(llm, tools, prompt)
 
-#get user input
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+    res = agent_executor.invoke({"input": query})
+    return res.get("output")
+
+
+
+#######################################################################################################
+#USER INTERFACE
+st.header("AI Chat Assistant")
 prompt=st.text_input("Prompt", placeholder="Enter your message")
 #check for previouse user prompts.
 if "user_prompt_history" not in st.session_state:
