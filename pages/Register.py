@@ -9,7 +9,7 @@ load_dotenv()
 
 
 def connect_with_server(username, password):
-    # Send a ping to confirm a successful connection
+    # Used to connect with the MongoDB
     uri = os.environ.get('URI_FOR_Mongo')
 
     # Create a new client and connect to the server
@@ -28,15 +28,23 @@ def connect_with_server(username, password):
         "password": password
     }
 
-    try:
-        # Insert data into the collection
-        result = collection.insert_one(data_to_insert)
-        print("Inserted document ID:", result.inserted_id)
-    except Exception as e:
-        print("Error inserting data:", e)
-    finally:
-        # Close the MongoDB connection
-        client.close()
+    # Query for the specified username and password
+    query = {"username": username}
+    result = collection.find_one(query)
+
+    # Check if username already exists
+    if result:
+        st.error("Username already exists")
+    else:
+        try:
+            # Insert data into the collection
+            collection.insert_one(data_to_insert)
+        except Exception as e:
+            st.error("Error inserting data:", e)
+        finally:
+            # Close the MongoDB connection and switch page
+            client.close()
+            st.switch_page("pages/chatbox.py")
 
 
 st.title("Register")
@@ -46,6 +54,6 @@ with st.form("my_form", clear_on_submit=True):
     username = st.text_input("Enter Username")
     st.text("Password:")
     password = st.text_input("Enter Password")
-    login = st.form_submit_button("Register")
-    if login:
+    register = st.form_submit_button("Register")
+    if register:
         connect_with_server(username, password)
