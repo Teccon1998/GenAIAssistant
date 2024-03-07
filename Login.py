@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def check_credentials(username, password):
+def check_credentials(username_from_client, password_from_client):
     # MongoDB connection URI
     uri = os.environ.get('URI_FOR_Mongo')
 
@@ -22,7 +22,7 @@ def check_credentials(username, password):
     collection = db[collection_name]
 
     # Query for the specified username and password
-    query = {"username": username, "password": password}
+    query = {"username": username_from_client, "password": password_from_client}
     result = collection.find_one(query)
 
     # Check if the result is not None (credentials exist)
