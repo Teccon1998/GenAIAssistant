@@ -8,12 +8,14 @@ load_dotenv()
 
 
 def check_credentials(username_from_client, password_from_client):
-    # MongoDB connection URI
-    uri = os.environ.get('URI_FOR_Mongo')
 
-    # Create a new client and connect to the server
-    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",
-                         server_api=ServerApi('1'))
+    # MongoDB URI without the tlsCAFile option
+    uri = os.environ.get('URI_FOR_MONGO')
+
+    # Create MongoClient object with tlsCAFile option
+    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem")
+
+    # Now you can use the 'client' object to interact with your MongoDB database
 
     # Select the database and collection
     database_name = "Elijuwon_Database_499"
