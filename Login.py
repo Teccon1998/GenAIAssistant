@@ -12,6 +12,8 @@ def check_credentials(username_from_client, password_from_client):
     # MongoDB URI without the tlsCAFile option
     uri = os.environ.get('URI_FOR_MONGO')
 
+    print(uri)
+
     # Create MongoClient object with tlsCAFile option
     client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem")
 
@@ -29,7 +31,7 @@ def check_credentials(username_from_client, password_from_client):
 
     # Check if the result is not None (credentials exist)
     if result:
-        st.switch_page("pages/chatbox.py")
+        st.switch_page("pages/chatbot.py")
     else:
         st.error("Incorrect username or password!")
 
