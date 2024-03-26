@@ -11,8 +11,8 @@ from langchain import hub
 import streamlit as st
 from streamlit_chat import message
 import os
+from tools.tavily_lookup_tool import tavilySearchTool
 
-from app import generate_response 
 
 #load enviroment variables
 load_dotenv(find_dotenv())
@@ -34,7 +34,7 @@ def conversationHandler(userInput):
     return conversation
 
 def generate_response(query):
-    tools = []
+    tools = [tavilySearchTool]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
@@ -63,7 +63,7 @@ if prompt:
         response=generate_response(prompt)
         #Variable that will be displayed to the user when
         formated_response=(
-            f"{response['result']}"
+            f"{response}"
         )
 
         st.session_state["user_prompt_history"].append(prompt)
