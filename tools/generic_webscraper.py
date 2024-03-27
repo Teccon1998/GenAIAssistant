@@ -73,7 +73,7 @@ def crawl_website_links():
         ),
     )
     index = VectorstoreIndexCreator().from_loaders([loader])
-    query = "What is LangChain?"
+    query = "What is the name, birthday and or address found on the url given"
     result = index.query_with_sources(query)
     return result
 

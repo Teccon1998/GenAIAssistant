@@ -43,7 +43,7 @@ def connect_with_server(username, password):
         finally:
             # Close the MongoDB connection and switch page
             client.close()
-            st.switch_page("pages/chatbox.py")
+            st.switch_page("pages/chatbot.py")
 
 
 st.title("Register")
