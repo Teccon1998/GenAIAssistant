@@ -8,9 +8,9 @@
       "name": "Python Debugger: Current File with Arguments",
       "type": "debugpy",
       "request": "launch",
-      "program": "C:\\Users\\16316\\ICSI 499\\GenAIAssistant\\venv\\Scripts\\streamlit.exe",
+      "program": "C:\\Users\\mafon\\Desktop\\GenAIAssistant\\.venv\\Scripts\\streamlit.exe",
       "console": "integratedTerminal",
-      "args": ["run", "C:\\Users\\16316\\ICSI 499\\GenAIAssistant\\Login.py"]
+      "args": ["run", "C:\\Users\\mafon\\Desktop\\GenAIAssistant\\pages\\chatbot.py"]
     }
   ]
 }
