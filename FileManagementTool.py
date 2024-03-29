@@ -1,5 +1,5 @@
 
-from langchain_community.agent_toolkits import FileManagem entToolkit
+from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain.tools import tool
 
 # Initialize the FileManagementToolkit with the root directory
