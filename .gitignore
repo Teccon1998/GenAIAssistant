@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -14,6 +15,8 @@ dist/
 downloads/
 eggs/
 .eggs/
+.vscode
+.idea
 lib/
 lib64/
 parts/
@@ -37,6 +40,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -50,6 +54,8 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.vscode
+.idea
 
 # Translations
 *.mo

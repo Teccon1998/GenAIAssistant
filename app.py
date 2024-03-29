@@ -43,7 +43,7 @@ def convert_txt_to_json(resume_text):
 
 
 def generate_response(input_text, uploaded_file=None):
-    tools = [convert_txt_to_json]
+    tools = [convert_txt_to_json,]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
