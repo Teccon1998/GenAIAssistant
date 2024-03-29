@@ -14,6 +14,9 @@ apify = ApifyWrapper(open_api_key)
 def crawl_website_links():
     """Combs through the various links provided and collects relevant data from that link"""
 
+    # skills, work experience and certifications
+    # grab as much as you can from linkedIn and job urls (eg glassdoor, handshake, indeed)
+
     # Prepare the Actor input
     run_input = {
         "startUrls": [{ "url": "https://www.linkedin.com/in/elijuwon-mitchell-99475314b/" }],

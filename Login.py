@@ -6,19 +6,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def check_credentials(username_from_client, password_from_client):
 
     # MongoDB URI without the tlsCAFile option
     uri = os.environ.get('URI_FOR_MONGO')
 
-    print(uri)
+    tlsCAFile = os.environ.get('tlsCAFile')
 
     # Create MongoClient object with tlsCAFile option
-    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem")
+    client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     # Now you can use the 'client' object to interact with your MongoDB database
-
     # Select the database and collection
     database_name = "Elijuwon_Database_499"
     collection_name = "login_info"
@@ -51,3 +49,4 @@ with st.form("my_form", clear_on_submit=True):
     login = st.form_submit_button("Log In")
     if login:
         check_credentials(username, password)
+
