@@ -6,4 +6,6 @@ openai~=1.12.0
 pinecone~=3.1.0
 pypdf~=4.0.2
 streamlit_chat~=0.1.1
+pymongo~=4.6.2
+tavily-python==0.3.1
 

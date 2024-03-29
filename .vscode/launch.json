@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "C:\\Users\\mafon\\Desktop\\GenAIAssistant\\.venv\\Scripts\\streamlit.exe",
       "console": "integratedTerminal",
-      "args": ["run", "C:\\Users\\mafon\\Desktop\\GenAIAssistant\\pages\\chatbot.py"]
+      "args": ["run", "C:\\Users\\mafon\\Desktop\\GenAIAssistant\\Login.py"]
     }
   ]
 }

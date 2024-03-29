@@ -7,11 +7,16 @@ from langchain.tools import tool
 from langchain.chains import LLMChain
 from langchain import hub
 
+#Tavily
+from tavily import TavilyClient
+
 from dotenv import load_dotenv,find_dotenv 
 import os
 
 #Find and Load Enviroment Variables
 load_dotenv(find_dotenv())
+tavily = TavilyClient(api_key=os.environ['TAVILY_API_KEY'])
+
 #This function uses the Tavily Search Engine to return all the social media accounts of a person
 def lookup(query:str)->str:
     """Searches for a person from their name and returns URL of their various social media pages"""
@@ -21,7 +26,8 @@ def lookup(query:str)->str:
     search = TavilySearchAPIWrapper()
     tavily_tool = TavilySearchResults(api_wrapper=search)
     tools_for_agent =[
-        tavily_tool
+        tavily_tool,
+        get_url_links
     ]
 
     #get user prompt
@@ -32,12 +38,15 @@ def lookup(query:str)->str:
                    associated with {name_of_person}. Your purpose is not to determine who the person is. There might be multiple people with the same name. 
                    Dont do anything except returning a bulleted list of URLs.
 
+                   Include the links in the final answer
+
 
                     ex)
                     Harrison Chase
                     LinkedIn: https://www.linkedin.com/in/harrison-chase-961287118 
                     Twitter: https://twitter.com/hwchase17/status/1695490295914545626
                     ...
+
                  """
     
     base_prompt=hub.pull("langchain-ai/openai-functions-template")
@@ -53,6 +62,13 @@ def lookup(query:str)->str:
     )
     tavily_results=agent_executor.invoke({"input": {query}})
     return tavily_results
+
+@tool #Function to get the URL links from the Tavily search
+def get_url_links(query:str)->str:
+    """Performs a search and returns a string of content and sources within token limit"""
+    searchContext=tavily.qna_search(query=query)
+    return searchContext
+    
 
 @tool #Create Tavily Search Tool
 def tavilySearchTool(name:str)->str:
@@ -84,11 +100,16 @@ def tavilySearchTool(name:str)->str:
 
     chain = LLMChain(llm=llm,prompt=summary_prompt_template,verbose=True)
     result=chain.invoke({"name_of_person": tavily_search_results})
-
-    #format the response. Replace new lines with a space
-    if "\n" in result:
-        result=result.replace("\n"," ")
-    else:
-        return result
-    
     return result
+
+
+#Helper function to format the response. Replace new lines with a space
+    
+def format_response(response:str)->str:
+
+    if "\n" in response:
+        response=response.replace("\n"," ")
+    else:
+        return response
+    
+    return response

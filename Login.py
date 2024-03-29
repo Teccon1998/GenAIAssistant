@@ -15,7 +15,8 @@ def check_credentials(username_from_client, password_from_client):
     print(uri)
 
     # Create MongoClient object with tlsCAFile option
-    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem")
+    tlsCAFile=os.environ.get('TLS_CA_FILE')
+    client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     # Now you can use the 'client' object to interact with your MongoDB database
 
