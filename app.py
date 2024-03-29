@@ -2,13 +2,14 @@ import streamlit as st
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_openai import OpenAI
-import fitz
+#import fitz
 from langchain_core.prompts import PromptTemplate
 from langchain.tools import tool
 from langchain_openai import ChatOpenAI
 import os
 from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
+from FileManagementTool import FileTool
 
 
 def convert_pdf_to_text(upload) -> str:
@@ -41,9 +42,10 @@ def convert_txt_to_json(resume_text):
     result = chain.invoke({"information": resume_text})
     return result
 
+file_tool = FileTool()
 
 def generate_response(input_text, uploaded_file=None):
-    tools = [convert_txt_to_json,]
+    tools = [convert_txt_to_json,file_tool]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()

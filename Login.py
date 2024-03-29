@@ -11,11 +11,11 @@ def check_credentials(username_from_client, password_from_client):
 
     # MongoDB URI without the tlsCAFile option
     uri = os.environ.get('URI_FOR_MONGO')
-
+    tlsCAFile=os.environ.get('CAPERM')
     print(uri)
 
     # Create MongoClient object with tlsCAFile option
-    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem")
+    client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     # Now you can use the 'client' object to interact with your MongoDB database
 
