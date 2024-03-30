@@ -12,9 +12,11 @@ def check_credentials(username_from_client, password_from_client):
     uri = os.environ.get('URI_FOR_MONGO')
 
     tlsCAFile = os.environ.get('tlsCAFile')
+    tlsCAFile = os.environ.get('tlsCAFile')
 
     # Create MongoClient object with tlsCAFile option
     tlsCAFile=os.environ.get('TLS_CA_FILE')
+    client = MongoClient(uri, tlsCAFile=tlsCAFile)
     client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     # Now you can use the 'client' object to interact with your MongoDB database
@@ -50,4 +52,5 @@ with st.form("my_form", clear_on_submit=True):
     login = st.form_submit_button("Log In")
     if login:
         check_credentials(username, password)
+
 
