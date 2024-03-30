@@ -17,78 +17,49 @@ import os
 load_dotenv(find_dotenv())
 tavily = TavilyClient(api_key=os.environ['TAVILY_API_KEY'])
 
-#This function uses the Tavily Search Engine to return all the social media accounts of a person
+#This function uses the Tavily Search Engine    to return all the social media accounts of a person
 def lookup(query:str)->str:
-    """Searches for a person from their name and returns URL of their various social media pages"""
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
-
-    #identify the tools
-    search = TavilySearchAPIWrapper()
-    tavily_tool = TavilySearchResults(api_wrapper=search)
-    tools_for_agent =[
-        tavily_tool,
-        get_url_links
-    ]
-
-    #get user prompt
-    instructions="""You are a search engine that given the full name of a person {name_of_person} find all of the URL links of various online profiles
-                   assioated with the name {name_of_person},
-                   You must list all the URLs to assosiated with the full name: {name_of_person}
-                   various social media accounts as a bulleted list and Include the  URLs with the list. Your purpose is just to display URLs
-                   associated with {name_of_person}. Your purpose is not to determine who the person is. There might be multiple people with the same name. 
-                   Dont do anything except returning a bulleted list of URLs.
-
-                   Include the links in the final answer
-
-
-                    ex)
-                    Harrison Chase
-                    LinkedIn: https://www.linkedin.com/in/harrison-chase-961287118 
-                    Twitter: https://twitter.com/hwchase17/status/1695490295914545626
-                    ...
-
-                 """
-    
-    base_prompt=hub.pull("langchain-ai/openai-functions-template")
-    prompt=base_prompt.partial(instructions=instructions)
-
-    # initialize the agent
-    agent = create_openai_functions_agent(llm,tools_for_agent,prompt)
-    #Execute the agent
-    agent_executor=AgentExecutor(
-        agent=agent,
-        tools=tools_for_agent,
-        verbose=True,
-    )
-    tavily_results=agent_executor.invoke({"input": {query}})
-    return tavily_results
-
-@tool #Function to get the URL links from the Tavily search
+    results=tavily.search(query,search_depth='advanced')
+    return results
+#Function to get the URL links from the Tavily search
 def get_url_links(query:str)->str:
     """Performs a search and returns a string of content and sources within token limit"""
-    searchContext=tavily.qna_search(query=query)
-    return searchContext
+    searchContext=tavily._search(query=query,search_depth='advanced')
+    #TODO: NARROW DOWN SEARCH CONTEXT RESULTS AND KEEP THE PARTS THE ARE USEFUL SO IT STAYS IN THE TOKEN LIMIT
+    #good=LINKEDIN BAD=YOUTUBE
+    #get source contexts from the tavily search
+    sources = searchContext.get("results", [])
+    context = [{"url": obj["url"]} for obj in sources]
+    #iterate through list of Dictionary to target specific contexts
+    for item in context:
+        #gets and return it as a list
+        urls=list(item.get("url"))
+    
+    return urls
     
 
 @tool #Create Tavily Search Tool
 def tavilySearchTool(name:str)->str:
     """Use to search for social media pages based on the full name of person  in the prompt"""
     tavily_search_results=lookup(name)
+    tavily_link_results=get_url_links(name)
 
     summary_template="""
-                      Start with letting the user know that you are listing out all the social media pages associated with the name: {name_of_person}
-                      Then list out all the social media pages and URLs assosiated with the full name: {name_of_person}
-                      You must list all the URLs to assosiated with the full name: {name_of_person}
-                      Underline the name. 
+                      Given this block of data provide a summary of that person. It must be at least 3 sentences.
+                      Also provide a list of links to their social media underlined and formatted.
 
+                    Example:
+                      
+                    Harrison Chase
+                    LinkedIn: https://www.linkedin.com/in/harrison-chase-961287118 
+                    Twitter: https://twitter.com/hwchase17/status/1695490295914545626
+                    etc..
 
-                      ex)
-                      Harrison Chase
-                      LinkedIn: https://www.linkedin.com/in/harrison-chase-961287118 
-                      Twitter: https://twitter.com/hwchase17/status/1695490295914545626
+                    Here is the data that is returned from the internet: {data},
 
-                      ... 
-                      These are all the profiles I can find associated with the name {name_of_person}
+                    and here is the list of links that needs to be outputted: {urls}.
+
+                    Begin.
                      """
     summary_prompt_template=PromptTemplate(
         input_variables=["information"],template=summary_template
@@ -99,7 +70,7 @@ def tavilySearchTool(name:str)->str:
     )
 
     chain = LLMChain(llm=llm,prompt=summary_prompt_template,verbose=True)
-    result=chain.invoke({"name_of_person": tavily_search_results})
+    result=chain.invoke({"data": tavily_search_results, "urls": tavily_link_results})
     return result
 
 
