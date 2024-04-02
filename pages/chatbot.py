@@ -22,6 +22,9 @@ chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
 llm=ChatOpenAI(temperature=0,model_name="gpt-3.5-turbo",openai_api_key=os.environ['OPENAI_API_KEY'])
 #handles converstations between Ai and User
 #Helps keep conversations within the token limit
+
+#TODO: ADD TO MONGO SO USERS CAN GO BACK ON CONVERSATIONS AND TO GO BACK ON TOPICS
+#SO AI CAN MAKE RECOMMENDATIONS 
 def conversationHandler(userInput):
     #intialize conversation memory chain
     conversation_with_summary = ConversationChain(
