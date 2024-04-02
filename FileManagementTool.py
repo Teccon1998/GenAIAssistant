@@ -1,60 +1,85 @@
-
 from langchain_community.agent_toolkits import FileManagementToolkit
-from langchain.tools import tool
+import json
+from langchain.tools import BaseTool
+from langchain_core.tools import ToolException
+import os
 
-# Initialize the FileManagementToolkit with the root directory
-toolkit = FileManagementToolkit(
-    root_dir='C:\\Users\\bgome\\OneDrive\Desktop\\Senior Year 2nd Semester\\499 - Capstone\\LangChain\\GenAIAssistant\\rootFileSystem',
-    selected_tools=["read_file", "write_file", "list_directory"]
-)
+current_dir = os.getcwd()
+ROOT_DIR = os.path.join(current_dir, os.environ.get('ROOT_FOLDER'))
 
-# Get a list of available tools in a form of a array 
-tools = toolkit.get_tools()
+class FileTool(BaseTool):
+    name = "file_tool"
+    description = """This tool performs file operations like read, write, and list directory contents. 
+                     The input should be a dict in the format: '<action> <file_path>' for read and <action> <file_path> <content> for write actions, or just '<action>' for the list action. 
+                     Allowed actions are 'read', 'write', and 'list'. For example: {"action": "read", "file_path": "example.txt"'}  or {"action": "write", "file_path": "example2.txt", "content": "hello world"'}."
 
-@tool
-def FileTool(input_dict: dict):
-    """
-    This function handles file operations.  
+                     This tool would output if the action wa sucessfull or not
+                """
+    # Initialize the FileManagementToolkit with the root directory
+    toolkit = FileManagementToolkit(
+        root_dir=ROOT_DIR, 
+        selected_tools=["read_file", "write_file", "list_directory","copy_file"]
+    )
+    # Get a list of available tools in a form of a array 
+    tools = toolkit.get_tools()
 
-    Args:
-        input_dict: A dictionary containing the action and parameters.
-            Example: {"action": "write", "file_path": "example.txt", "text": "hello world"}
+    #The main function of the class 
+    def _run(self, input_dir:dict):
+        """This is a tool that uses ToolkitManagement Tools to perform file actions"""
+    
+        #This takes the JSON formatted string passed by the Agent anf turns it into a dictionary ex) {"action": "read", "file_path": "example.txt"'}
+        try:
+            dic = json.loads(input_dir)
+        except json.decoder.JSONDecodeError:
+        # Prompt the agent to reformulate its input in the correct JSON format
+            
+            return "Invalid JSON format. Please reformulate your input as a valid JSON string in the format: {'action': 'read/write/list', 'file_path': 'path/to/file', 'content': 'text to write' (for write action only)}."
         
-    """
-    print(dict)
+        ACTIONS = ["read", "write", "list", "delete"]
 
-    FileAction = input_dict.get("action")
-    File_path = input_dict.get("file_path")
-    Text = input_dict.get("text")
+        if 'action' in dic:
+            # using key values of the dictionary to assign the file action to be performed 
+            action = dic['action']
+        else:
+            # {', '.join(ACTIONS)}-> .join is a string function that takes a iterable and concats them together, the string that appears before join behaves as the seperator
+            # This error does not stop the agent, but gives it a message with helpful information (list of ACTIONS) and allows it a chance to correct itself
+            # ToolExceptions are passed to handle_tool_error function for error handling when a tool is instantiated 
+            raise ToolException(f"Invalid action: {action}. Allowed actions are: {', '.join(ACTIONS)}")
 
+        if action == "write": 
+            # Write action requires a target file and text to be written into, if neither exist then throw an error
+            if 'file_path' in dic:
+                file_path = dic['file_path']
+            else:
+                 # error reminnds the agent of the neccesary parameters for this action 
+                 raise ToolException("For the 'write' action, 'file_path' is required")
+            if 'content' in dic:
+                text = dic['content']
+            else: 
+                 # error reminds the agent of the neccesary parameters for this action 
+                 raise ToolException("For the 'write' action, 'text' is required") 
+            
+            write_tool = self.tools[1] # selects the write tool 
+            res = write_tool.invoke({"file_path": file_path, "text": text})
+            return res
+        elif action == "read":
+            if 'file_path' in dic:
+                file_path = dic['file_path']
+            else: 
+                # error reminds the agent of the neccesary parameters for this action 
+                raise ToolException("For the 'write' action, 'file_path' is required")
+            read_tool = self.tools[0] # selects the read tool 
+            res = read_tool.invoke({"file_path": file_path})
+            return res
+        elif action == "list":
+            list_tool = self.tools[2] # selects the list tool 
+            res = list_tool.invoke({})
+            return res
+        elif action == "delete":
+            return "Unfortunately I am not allowed to delete files, DO IT YOURSELF!!!"
         
-    # Printing the variables to verify
-    print("FileAction:", FileAction)
-    print("File_path:", File_path)
-    print("Text:", Text)
-  
-  
-
-    if FileAction == "write":
-        print("Write Function")
-        write_tool = tools[1]  # Assuming 'write_file' is the second too
-        res = write_tool.invoke({"file_path": File_path, "text": Text})
-        print(res)
-        return res
-    elif FileAction == "read":
-        print("Hello read")
-        read_tool = tools[0]
-        res = read_tool.invoke({"file_path": File_path})
-        print("RESULT: " + res)
-        return res
-    elif FileAction == "list":
-        print("List Function")
-        list_tool = tools[2]
-        res = list_tool.invoke({})
-  
 
 
-
-
+# TODO: "create a handle error function for the ToolExceptions "
 
 
