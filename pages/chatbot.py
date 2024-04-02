@@ -14,6 +14,7 @@ import os
 from tools.tavily_lookup_tool import tavilySearchTool
 
 
+print( st.session_state["username"])
 #load enviroment variables
 load_dotenv(find_dotenv())
 #intialize chat model
