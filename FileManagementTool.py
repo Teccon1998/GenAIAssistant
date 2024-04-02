@@ -5,7 +5,7 @@ from langchain_core.tools import ToolException
 import os
 
 current_dir = os.getcwd()
-ROOT_DIR = os.path.join(current_dir, os.environ.get('ROOT_FOLDER'))
+ROOT_DIR = os.path.join(current_dir, "rootFileSystem")
 
 class FileTool(BaseTool):
     name = "file_tool"
