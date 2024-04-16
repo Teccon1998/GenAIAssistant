@@ -6,17 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def check_credentials(username_from_client, password_from_client):
 
+def check_credentials(username_from_client, password_from_client):
     # MongoDB URI without the tlsCAFile option
     uri = os.environ.get('URI_FOR_MONGO')
 
-    tlsCAFile = os.environ.get('tlsCAFile')
-    tlsCAFile = os.environ.get('tlsCAFile')
-
     # Create MongoClient object with tlsCAFile option
-    tlsCAFile=os.environ.get('TLS_CA_FILE')
-    client = MongoClient(uri, tlsCAFile=tlsCAFile)
+    tlsCAFile=os.environ.get('tlsCAFile')
     client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     # Now you can use the 'client' object to interact with your MongoDB database
@@ -32,6 +28,8 @@ def check_credentials(username_from_client, password_from_client):
 
     # Check if the result is not None (credentials exist)
     if result:
+        st.session_state["username"] = username
+        st.success(f"Logged in as: {username}")
         st.switch_page("pages/chatbot.py")
     else:
         st.error("Incorrect username or password!")
@@ -48,9 +46,7 @@ with st.form("my_form", clear_on_submit=True):
     st.text("Username:")
     username = st.text_input("Enter Username")
     st.text("Password:")
-    password = st.text_input("Enter Password")
+    password = st.text_input("Enter Password", type="password")
     login = st.form_submit_button("Log In")
     if login:
         check_credentials(username, password)
-
-

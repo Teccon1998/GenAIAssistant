@@ -17,6 +17,7 @@ from tools.googleJobsTool import get_google_jobs_tool
 
 
 
+print( st.session_state["username"])
 #load enviroment variables
 load_dotenv(find_dotenv())
 #intialize chat model
