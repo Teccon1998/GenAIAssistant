@@ -16,8 +16,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-.vscode
-.idea
 lib/
 lib64/
 parts/
@@ -40,7 +38,6 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-launch.json
 
 
 # Unit test / coverage reports
@@ -111,10 +108,8 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
-env/
-venv/
 ENV/
+venv
 env.bak/
 venv.bak/
 
@@ -135,6 +130,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-#debugging settings 
-launch.json

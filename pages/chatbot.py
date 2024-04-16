@@ -13,7 +13,6 @@ from streamlit_chat import message
 import os
 from tools.tavily_lookup_tool import tavilySearchTool
 from tools.FileManagementTool import FileTool
-from tools.googleJobsTool import get_google_jobs_tool
 
 
 
