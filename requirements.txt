@@ -16,3 +16,4 @@ pathlib==1.0.1
 configparser==6.0.1
 filelock==3.13.1
 PyMuPDF==1.24.1
+langchain-openai~=0.1.3
