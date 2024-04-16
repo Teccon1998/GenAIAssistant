@@ -6,12 +6,15 @@ from langchain.memory import ConversationTokenBufferMemory
 from dotenv import load_dotenv,find_dotenv 
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain import hub
-
+from langchain.tools import HumanInputRun
 # frontend tool 
 import streamlit as st
 from streamlit_chat import message
 import os
 from tools.tavily_lookup_tool import tavilySearchTool
+from tools.FileManagementTool import FileTool
+from tools.googleJobsTool import get_google_jobs_tool
+
 
 
 #load enviroment variables
@@ -19,8 +22,8 @@ load_dotenv(find_dotenv())
 #intialize chat model
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
 #initialize LLM
-llm=ChatOpenAI(temperature=0,model_name="gpt-3.5-turbo",openai_api_key=os.environ['OPENAI_API_KEY'])
-#handles converstations between Ai and User
+llm=ChatOpenAI(temperature=0.1,model_name="gpt-3.5-turbo",openai_api_key=os.environ['OPENAI_API_KEY'])
+#handles converstations between Ai and User``
 #Helps keep conversations within the token limit
 
 #TODO: ADD TO MONGO SO USERS CAN GO BACK ON CONVERSATIONS AND TO GO BACK ON TOPICS
@@ -37,7 +40,8 @@ def conversationHandler(userInput):
     return conversation
 
 def generate_response(query):
-    tools = [tavilySearchTool]
+    file_tool = FileTool()
+    tools = [tavilySearchTool, file_tool]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
