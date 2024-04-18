@@ -56,6 +56,9 @@ with st.form("my_form", clear_on_submit=True):
     password = st.text_input("Enter Password")
     register = st.form_submit_button("Register")
     
+    
+    ##TODO: Add DOCX and TXT
+    ##TODO: make this a part of a mongo user profile: Elijuwon task.
     fileUpload = st.file_uploader("Upload your file:",type="pdf")
 
     if fileUpload:
