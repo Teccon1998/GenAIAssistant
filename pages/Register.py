@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
+from tools import JSONIFYTool
 
 load_dotenv()
 
@@ -54,5 +55,12 @@ with st.form("my_form", clear_on_submit=True):
     st.text("Password:")
     password = st.text_input("Enter Password")
     register = st.form_submit_button("Register")
+    
+    fileUpload = st.file_uploader("Upload your file:",type="pdf")
+
+    if fileUpload:
+        res = JSONIFYTool.pdf_to_json(fileUpload)
+        print(res.get("text"))
+        st.write(res.get("text"))
     if register:
         connect_with_server(username, password)
