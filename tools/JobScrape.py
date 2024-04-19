@@ -9,10 +9,10 @@ from typing import List
 
 # The Pydantic model that (roughly) instructs the llm what the output should be
 class LinkedInProfile(BaseModel):
-    name: str = Field(description="The person's name")
-    education: str = Field(description="The person's educational background, including degrees, institutions, and years attended.")
-    experience: List[str] = Field(description="A list of dictionaries, where each dictionary represents a job or work experience. Each dictionary should have keys for 'job_title', 'company', 'start_date', 'end_date' (if applicable), and 'description' <job-title> <start-date> <end-date> <job-description> ex) {"'experience'": [{'job-title': 'baby-sitter', 'start-date':'1999', 'end-date': 'present', 'job-description':'Was the primary guardian for 2 children ages 4, and 8'},{'job-title': 'porter', 'start-date':'2003', 'end-date': '2020', 'job-description':'Was in charge of cleaning the lobby, and prepping apartments for new incoming residents'}]}.")
-    skills: List[str] = Field(description="A list of skills, including technical skills, soft skills, and domain-specific skills related to the person's field or industry.")
+    job_title: str = Field(description="The name of the Job title")
+    location: str = Field(description="The area in which the Job is located, mention if their are any work from home options")
+    salary: int = Field(description="The salary amount that the Job is paying")
+    skills: List[str] = Field(description="A list of skills, including technical skills, soft skills, and domain-specific skills needed for the job")
 
 # The llm that would be in charge of reading the provided text and infer information out of it 
 llm = ChatOpenAI(temperature=0.0)
@@ -42,12 +42,7 @@ def scrape_with_playwright(urls):
         try:
             # Define the prompt
             prompt = """
-            Extract the following information from the profile page and return a output in JSON format:
-
-            Step 1) Find the name over the person who ownes the profile 
-            Step 2) With the text given Search for the persons Education, include the name of the school, and their degree 
-            Step 3) Find the list of Work experience in the text given and add them in a list, with each index being a dict with the keys <job-title> <start-date> <end-date> <job-description> ex) {"experience": [{'job-title': 'baby-sitter', 'start-date':'1999', 'end-date': 'present', 'job-description':'Was the primary guardian for 2 children ages 4, and 8'},{'job-title': 'porter', 'start-date':'2003', 'end-date': '2020', 'job-description':'Was in charge of cleaning the lobby, and prepping apartments for new incoming residents'}]}
-            Step 4) With the text given look for Skills within the text that are within the <li> containers
+            Extract as much information possible from the job posting page and return a output in JSON format:
             """
 
             # Combine the prompt with the content of the handfull of splits
@@ -69,10 +64,7 @@ def scrape_with_playwright(urls):
         return 
 
 
-profile = "https://www.linkedin.com/in/chidansh/"
-skills = profile + "details/skills/"
-experience = profile + "detials/experience/"
-education = profile + "details/education/"
 
-urls = [profile,skills,experience,education]
+
+urls = ["https://www.linkedin.com/jobs/view/3877286858/?alternateChannel=search&refId=Sbx3rE8NqZwGEhKwCU8eYQ%3D%3D&trackingId=%2BGjiTZNneFidDIjb1yOFqw%3D%3D"]
 extracted_content = scrape_with_playwright(urls)
