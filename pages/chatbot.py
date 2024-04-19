@@ -1,12 +1,29 @@
 #This file will implement the chatbot feature
-from langchain_openai import ChatOpenAI,OpenAI
-from langchain.chains import ConversationChain
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationTokenBufferMemory
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import AIMessage, HumanMessage
+
+
 from dotenv import load_dotenv,find_dotenv 
 from langchain.agents import AgentExecutor, create_react_agent
-from langchain import hub
-from langchain.tools import HumanInputRun
+
+#LangChain Messages
+from langchain_core.messages import SystemMessage
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory
+import secrets # for generating random session ID
+
+
+#Message Prompt Tools
+from langchain.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    MessagesPlaceholder, 
+    SystemMessagePromptTemplate
+)
+
+from langchain_core.runnables.history import RunnableWithMessageHistory
+
 # frontend tool 
 import streamlit as st
 from streamlit_chat import message
@@ -16,42 +33,99 @@ from tools.FileManagementTool import FileTool
 
 
 
-print( st.session_state["username"])
 #load enviroment variables
 load_dotenv(find_dotenv())
 #intialize chat model
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
+chat_model_with_stop = chat.bind(stop=["\nObservation"])
+#secrets.token_hex(16) used to generate a random hex token to act as session ID. 16 Byte Length
+chat_session_token=secrets.token_hex(16)
+
 #initialize LLM
-llm=ChatOpenAI(temperature=0.1,model_name="gpt-3.5-turbo",openai_api_key=os.environ['OPENAI_API_KEY'])
+llm=chat_model_with_stop
 #handles converstations between Ai and User``
 #Helps keep conversations within the token limit
 
 #TODO: ADD TO MONGO SO USERS CAN GO BACK ON CONVERSATIONS AND TO GO BACK ON TOPICS
 #SO AI CAN MAKE RECOMMENDATIONS 
-def conversationHandler(userInput):
-    #intialize conversation memory chain
-    conversation_with_summary = ConversationChain(
-        llm=llm,
-        #keeps a buffer of recent interactions in memory, and uses token length rather than number of interactions to determine when to flush interactions.
-        verbose=True,
-        memory = ConversationTokenBufferMemory(llm=llm, return_messages=True,max_token_limit=10),
-    )
-    conversation=conversation_with_summary.predict(input=userInput)
-    return conversation
 
-def generate_response(query):
+def generate_response(query:str):
+    
     file_tool = FileTool()
     tools = [tavilySearchTool, file_tool]
-    prompt = hub.pull("hwchase17/react")
-    print("PROMPT: " + str(prompt))
-    llm = OpenAI()
-    agent = create_react_agent(llm, tools, prompt)
+    
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""You are a chatbot having a conversation with a human.
+                Try to answer the questions to the best of your ability.
+                """
+            ),  # The persistent system prompt
+            
+            SystemMessagePromptTemplate.from_template(
+                """
+                You have access to these tools {tools}
+                
+                Use a json blob to specify a tool by providing an action key (tool name) 
+                and an action_input key (tool input). Valid "action" values: "Final Answer" or {tool_names}
+                Provide only ONE action per $JSON_BLOB, as shown:
+                ```
+                {{
+                    "action": $TOOL_NAME,
+                    "action_input": $query
+                }}
+                
+                ```
+                Follow this format:
+                Question: input question to answer Thought: consider previous and subsequent steps
+                Action:
+                ```
+                $JSON_BLOB
+                ```
+                Observation: action result ... (repeat Thought/Action/Observation N times)
+                Thought: I know what to respond
+                Action:
+                ```
+                {{
+                    "action": "Final Answer",
+                    "action_input": "Final response to human"
+                }}
+                Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary.
+                Respond directly if appropriate. Format is Action:```$JSON_BLOB``` then Observation
+                """
+            ),
+            
+            MessagesPlaceholder(
+                variable_name="chat_history"
+            ),  # Where the memory will be stored.
+            
+            HumanMessagePromptTemplate.from_template(
+                "{query},{agent_scratchpad}"
+            ),  # Where the human input will injected
+        ]
+    )
+    
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    agent = create_react_agent(llm=llm, tools=tools, prompt=prompt,)
 
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
-    res = agent_executor.invoke({"input": query})
+    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory, handle_parsing_errors=True)
+    agent_with_chat_history = RunnableWithMessageHistory(
+        agent_executor,
+        get_session_history,
+        input_messages_key="query",
+        history_messages_key="chat_history",
+    )
+    
+    res = agent_with_chat_history.invoke({"query": query},config={"configurable": {"session_id": chat_session_token}},) 
     return res.get("output")
 
-
+#get session histor function
+def get_session_history(session_id:str)-> BaseChatMessageHistory:
+    #add chat history
+    if session_id not in st.session_state:
+        st.session_state[session_id]=ChatMessageHistory()
+        
+    return st.session_state[session_id]
 
 #######################################################################################################
 #USER INTERFACE
@@ -64,6 +138,7 @@ if "user_prompt_history" not in st.session_state:
 #check for chat answers
 if "chat_message_history" not in st.session_state:
     st.session_state["chat_message_history"]=[]
+    
 
 if prompt:
     with st.spinner("Generating Response..."):
@@ -75,9 +150,17 @@ if prompt:
 
         st.session_state["user_prompt_history"].append(prompt)
         st.session_state["chat_message_history"].append(formated_response)
+        #add context to memory
+        messages = [
+            HumanMessage(content=prompt),
+            AIMessage(content=formated_response)
+        ]
+        
+        st.session_state[chat_session_token].add_message(messages)
+        
 
 #if the streamlit session state is not empty. Output responses
 if st.session_state["chat_message_history"]:
-    for response, user_query in zip(st.session_state["chat_message_history"],st.session_state["user_prompt_history"]):
+    for response, user_query in zip(st.session_state["chat_message_history"], st.session_state["user_prompt_history"]):
         message(user_query,is_user=True)
         message(response)
