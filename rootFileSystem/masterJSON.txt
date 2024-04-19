@@ -1,0 +1,15 @@
+{
+    "name": "Bryan Gomez",
+    "education": "University at Albany, SUNY - Graduating senior with a passion for computer science (May 2024)",
+    "experience": [
+        "Skilled Advanced Tools Development Intern at NYS Office of Information Technology Services, Lynbrook, New York, United States"   
+    ],
+    "skills": [
+        "HTML",
+        "JavaScript",
+        "JSON",
+        "CSS",
+        "Firebase",
+        "Angular"
+    ]
+}

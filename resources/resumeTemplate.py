@@ -1,4 +1,3 @@
-import docx 
 import os
 
 current_dir = os.getcwd()
@@ -7,22 +6,76 @@ ROOT_DIR = os.path.join(current_dir, "rootFileSystem")
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
+
+"""
+JSON INFO: 
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "address": "1234 Main Street",
+  "city": "Anytown",
+  "state": "Anystate",
+  "zip_code": "12345",
+  "email": "johndoe@example.com",
+  "phone": "555-1234",
+  "resume_path": "/path/to/resume.docx",
+  "jobs": [
+    {
+      "organization": "Tech Solutions Inc.",
+      "position": "Senior Software Engineer",
+      "city_state": "New York, NY",
+      "date": {
+        "start": "2021-08-01",
+        "end": "Present"
+      },
+      "details": [
+        "Led the development of a new feature-rich mobile application that increased customer engagement by 70%.",
+        "Collaborated with cross-functional teams to integrate advanced AI-driven analytics into company products.",
+        "Managed a team of junior developers, overseeing project progress and providing mentorship."
+      ]
+    },
+    {
+      "organization": "Innovative Web Services",
+      "position": "Web Developer",
+      "city_state": "San Francisco, CA",
+      "date": {
+        "start": "2019-05-01",
+        "end": "2021-07-31"
+      },
+      "details": [
+        "Developed responsive website designs compatible with multiple browsers and devices.",
+        "Optimized page load times, achieving a 30% improvement on average.",
+        "Implemented security best practices to safeguard user data and company intellectual property."
+      ]
+    }
+  ]
+}
+
+
+"""
+
 # Create a new Document
 doc = Document()
 
 # Function to add a resume heading
-def add_resume_heading(doc, text):
+def add_resume_heading(doc, firstName, lastName, address, city, state, zip_code, email, phone):
+    """ Use this tool to create a header for a resume document """
+
     heading = doc.add_heading(level=1)
-    run = heading.add_run(text)
+    run = heading.add_run(firstName + ' ' + lastName)
     run.bold = True
     heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    doc.add_paragraph(address + '•' +  city + ',' + state + ' ' + zip_code  + ' • ' + email +  ' • ' +  phone)
 
 # Function to add a resume section with title
 def add_section_with_title(doc, title):
+    """ This is a tool used to create a section to a title, You are to generate the title yourself, this is for sections of the document like "Experience" " Originizations" "Skills & Interest" and any other neccesary sections """
     doc.add_paragraph(title, style='Heading2')
 
 # Function to add an experience with bullet points
 def add_experience(doc, organization, position, city_state, date, details):
+    """ THis is used to add an experience with bullet points"""
     doc.add_paragraph(organization, style='Heading3')
     p = doc.add_paragraph()
     p.add_run(position + ' ').bold = True
@@ -33,7 +86,6 @@ def add_experience(doc, organization, position, city_state, date, details):
 
 # Resume header
 add_resume_heading(doc, 'Firstname Lastname\n')
-doc.add_paragraph('Home Street Address • City, State Zip • yourmail@college.harvard.edu • phone number')
 
 # Education section
 add_section_with_title(doc, 'Education')
