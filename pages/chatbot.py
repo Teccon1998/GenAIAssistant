@@ -65,33 +65,21 @@ def generate_response(query:str):
             SystemMessagePromptTemplate.from_template(
                 """
                 You have access to these tools {tools}
+                Action: You can optionally use the following tools if needed: [{tool_names}]
+                Thought: I know what to respond
                 
                 Use a json blob to specify a tool by providing an action key (tool name) 
-                and an action_input key (tool input). Valid "action" values: "Final Answer" or {tool_names}
+                and an action_input key (tool input).
                 Provide only ONE action per $JSON_BLOB, as shown:
                 ```
                 {{
-                    "action": $TOOL_NAME,
-                    "action_input": $query
+                    "action": $TOOL_NAME, Use tools if necessary. Respond directly if appropriate.
+                    "action_input": The input to the action
+                    "Thought: {agent_scratchpad}
                 }}
                 
                 ```
-                Follow this format:
-                Question: input question to answer Thought: consider previous and subsequent steps
-                Action:
-                ```
-                $JSON_BLOB
-                ```
-                Observation: action result ... (repeat Thought/Action/Observation N times)
-                Thought: I know what to respond
-                Action:
-                ```
-                {{
-                    "action": "Final Answer",
-                    "action_input": "Final response to human"
-                }}
-                Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary.
-                Respond directly if appropriate. Format is Action:```$JSON_BLOB``` then Observation
+                Begin!
                 """
             ),
             
@@ -100,7 +88,7 @@ def generate_response(query:str):
             ),  # Where the memory will be stored.
             
             HumanMessagePromptTemplate.from_template(
-                "{query},{agent_scratchpad}"
+                "{query},"
             ),  # Where the human input will injected
         ]
     )
@@ -108,7 +96,15 @@ def generate_response(query:str):
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     agent = create_react_agent(llm=llm, tools=tools, prompt=prompt,)
 
-    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory, handle_parsing_errors=True)
+    agent_executor = AgentExecutor.from_agent_and_tools(
+        agent=agent, 
+        tools=tools, 
+        verbose=True,
+        memory=memory, 
+        handle_parsing_errors=True,
+        early_stopping_method="force", # Applies final pass to generate an output if max iterations is reached
+        max_iterations=5 # Sets the number of intermediate steps
+    )          
     agent_with_chat_history = RunnableWithMessageHistory(
         agent_executor,
         get_session_history,
@@ -126,6 +122,7 @@ def get_session_history(session_id:str)-> BaseChatMessageHistory:
         st.session_state[session_id]=ChatMessageHistory()
         
     return st.session_state[session_id]
+
 
 #######################################################################################################
 #USER INTERFACE
@@ -162,5 +159,7 @@ if prompt:
 #if the streamlit session state is not empty. Output responses
 if st.session_state["chat_message_history"]:
     for response, user_query in zip(st.session_state["chat_message_history"], st.session_state["user_prompt_history"]):
-        message(user_query,is_user=True)
-        message(response)
+        #give each message widget a unique key not based off of output
+        message(user_query,is_user=True, key=secrets.token_hex(8))
+        message(response, key=secrets.token_hex(8))
+
