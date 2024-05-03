@@ -5,7 +5,7 @@ from langchain.schema import AIMessage, HumanMessage
 
 
 from dotenv import load_dotenv,find_dotenv 
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_react_agent, create_openai_tools_agent
 
 #LangChain Messages
 from langchain_core.messages import SystemMessage
@@ -27,83 +27,47 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 # frontend tool 
 import streamlit as st
 from streamlit_chat import message
-import os
 from tools.tavily_lookup_tool import tavilySearchTool
 from tools.FileManagementTool import FileTool
+from langchain import hub
 
 
 
 #load enviroment variables
 load_dotenv(find_dotenv())
 #intialize chat model
-chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
-chat_model_with_stop = chat.bind(stop=["\nObservation"])
-#secrets.token_hex(16) used to generate a random hex token to act as session ID. 16 Byte Length
+chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
 chat_session_token=secrets.token_hex(16)
 
-#initialize LLM
-llm=chat_model_with_stop
-#handles converstations between Ai and User``
-#Helps keep conversations within the token limit
-
-#TODO: ADD TO MONGO SO USERS CAN GO BACK ON CONVERSATIONS AND TO GO BACK ON TOPICS
-#SO AI CAN MAKE RECOMMENDATIONS 
 
 def generate_response(query:str):
     
     file_tool = FileTool()
     tools = [tavilySearchTool, file_tool]
     
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            SystemMessage(
-                content="""You are a chatbot having a conversation with a human.
-                Try to answer the questions to the best of your ability.
-                """
-            ),  # The persistent system prompt
-            
-            SystemMessagePromptTemplate.from_template(
-                """
-                You have access to these tools {tools}
-                Action: You can optionally use the following tools if needed: [{tool_names}]
-                Thought: I know what to respond
-                
-                Use a json blob to specify a tool by providing an action key (tool name) 
-                and an action_input key (tool input).
-                Provide only ONE action per $JSON_BLOB, as shown:
-                ```
-                {{
-                    "action": $TOOL_NAME, Use tools if necessary. Respond directly if appropriate.
-                    "action_input": The input to the action
-                    "Thought: {agent_scratchpad}
-                }}
-                
-                ```
-                Begin!
-                """
-            ),
-            
-            MessagesPlaceholder(
-                variable_name="chat_history"
-            ),  # Where the memory will be stored.
-            
-            HumanMessagePromptTemplate.from_template(
-                "{query},"
-            ),  # Where the human input will injected
-        ]
-    )
+    # Create prompt template
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", 
+         "You are a helpful assistant. You may not need to use tools for every query - the user may just want to chat!",
+         ),
+        #MessagesPlaceholder(variable_name="messages"),
+        #MessagesPlaceholder(variable_name="messages"),
+        MessagesPlaceholder(variable_name="chat_history"), ("human", "{query}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"),
+    ])
     
+    
+    #initialize memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    agent = create_react_agent(llm=llm, tools=tools, prompt=prompt,)
+    #agent = create_react_agent(llm=llm, tools=tools, prompt=prompt,)
+    agent = create_openai_tools_agent(chat, tools, prompt,)
 
-    agent_executor = AgentExecutor.from_agent_and_tools(
+    agent_executor = AgentExecutor(
         agent=agent, 
-        tools=tools, 
+        tools=tools,
         verbose=True,
-        memory=memory, 
-        handle_parsing_errors=True,
-        early_stopping_method="force", # Applies final pass to generate an output if max iterations is reached
-        max_iterations=5 # Sets the number of intermediate steps
+        memory=memory
     )          
     agent_with_chat_history = RunnableWithMessageHistory(
         agent_executor,
@@ -111,8 +75,8 @@ def generate_response(query:str):
         input_messages_key="query",
         history_messages_key="chat_history",
     )
-    
     res = agent_with_chat_history.invoke({"query": query},config={"configurable": {"session_id": chat_session_token}},) 
+
     return res.get("output")
 
 #get session histor function
