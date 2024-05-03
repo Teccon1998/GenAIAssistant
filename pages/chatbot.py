@@ -5,10 +5,9 @@ from langchain.schema import AIMessage, HumanMessage
 
 
 from dotenv import load_dotenv,find_dotenv 
-from langchain.agents import AgentExecutor, create_react_agent, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_openai_tools_agent
 
 #LangChain Messages
-from langchain_core.messages import SystemMessage
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 import secrets # for generating random session ID
@@ -17,9 +16,8 @@ import secrets # for generating random session ID
 #Message Prompt Tools
 from langchain.prompts import (
     ChatPromptTemplate,
-    HumanMessagePromptTemplate,
     MessagesPlaceholder, 
-    SystemMessagePromptTemplate
+    
 )
 
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -37,6 +35,8 @@ from langchain import hub
 load_dotenv(find_dotenv())
 #intialize chat model
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+#initialize memory
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 chat_session_token=secrets.token_hex(16)
 
@@ -57,9 +57,6 @@ def generate_response(query:str):
         MessagesPlaceholder(variable_name="agent_scratchpad"),
     ])
     
-    
-    #initialize memory
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     #agent = create_react_agent(llm=llm, tools=tools, prompt=prompt,)
     agent = create_openai_tools_agent(chat, tools, prompt,)
 
@@ -91,7 +88,6 @@ def get_session_history(session_id:str)-> BaseChatMessageHistory:
 #######################################################################################################
 #USER INTERFACE
 st.header("AI Chat Assistant")
-prompt=st.text_input("Prompt", placeholder="Enter your message")
 #check for previouse user prompts.
 if "user_prompt_history" not in st.session_state:
     st.session_state["user_prompt_history"]=[]
@@ -101,7 +97,7 @@ if "chat_message_history" not in st.session_state:
     st.session_state["chat_message_history"]=[]
     
 
-if prompt:
+if prompt:= st.chat_input("Enter your message"):
     with st.spinner("Generating Response..."):
         response=generate_response(prompt)
         #Variable that will be displayed to the user when
@@ -126,4 +122,3 @@ if st.session_state["chat_message_history"]:
         #give each message widget a unique key not based off of output
         message(user_query,is_user=True, key=secrets.token_hex(8))
         message(response, key=secrets.token_hex(8))
-
