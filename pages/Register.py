@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
+from tools import JSONIFYTool
 
 load_dotenv()
 
@@ -71,6 +72,16 @@ with st.form("my_form", clear_on_submit=True):
     st.text("LinkedIn Link:")
     link = st.text_input("Please enter your linkedIn profile page link")
     register = st.form_submit_button("Register")
+    
+    
+    ##TODO: Add DOCX and TXT
+    ##TODO: make this a part of a mongo user profile: Elijuwon task.
+    fileUpload = st.file_uploader("Upload your file:",type="pdf")
+
+    if fileUpload:
+        res = JSONIFYTool.pdf_to_json(fileUpload)
+        print(res.get("text"))
+        st.write(res.get("text"))
     if register:
         # Initialize session state keys
         if 'linkedInLink' not in st.session_state:
