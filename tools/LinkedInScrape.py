@@ -7,6 +7,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 import pydantic
 from typing import List
 from langchain.tools import tool
+import streamlit as st
 
 # The Pydantic model that (roughly) instructs the llm what the output should be
 class LinkedInProfile(BaseModel):
@@ -20,8 +21,16 @@ llm = ChatOpenAI(temperature=0.0)
 # with_structured_output is a funciton that takes in a model and assigns it to an LLM, this is actually assigning the Pydantic model from above 
 structured_llm = llm.with_structured_output(LinkedInProfile)
 
-def scrape_with_playwright(urls: list[str]):
+def scrape_with_playwright():
     """ This tool takes a profile link from LinkedIn and pulls the users information and returns json information on it """
+   
+    profile = st.session_state['link']
+    skills = profile + "details/skills/"
+    experience = profile + "detials/experience/"
+    education = profile + "details/education/"
+
+    urls = [profile,skills,experience,education]
+
     # Gets the web pages and prepares them to load them to transform them into Document objects
     loader = AsyncChromiumLoader(urls)
     # loads the found web pages into Documents
@@ -71,10 +80,5 @@ def scrape_with_playwright(urls: list[str]):
         return 
 
 
-profile = "https://www.linkedin.com/in/bryan-gomez-87708b179/"
-skills = profile + "details/skills/"
-experience = profile + "detials/experience/"
-education = profile + "details/education/"
 
-urls = [profile,skills,experience,education]
-extracted_content = scrape_with_playwright(urls)
+# extracted_content = scrape_with_playwright(urls)

@@ -13,9 +13,6 @@ from streamlit_chat import message
 import os
 from tools.tavily_lookup_tool import tavilySearchTool
 from tools.FileManagementTool import FileTool
-from tools.resumeGeneratorTool import ResumeGeneratorTool;
-from tools.LinkedInScrape import scrape_with_playwright
-
 
 
 print( st.session_state["username"])
@@ -43,8 +40,8 @@ def conversationHandler(userInput):
 
 def generate_response(query):
     file_tool = FileTool()
-    resumeGenerator = ResumeGeneratorTool()
-    tools = [tavilySearchTool, file_tool, resumeGenerator]
+    # resumeGenerator = ResumeGeneratorTool()
+    tools = [tavilySearchTool, file_tool]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
