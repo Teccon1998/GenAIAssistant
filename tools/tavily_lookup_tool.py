@@ -45,7 +45,7 @@ def tavilySearchTool(name:str)->str:
     tavily_link_results=get_url_links(name)
 
     summary_template="""
-                      Given this block of data provide a summary of that person git It must be at least 3 sentences.
+                      Given this block of data provide a summary of that person. The final response must be at least 3 sentences.
                       Also provide a list of links to their social media underlined and formatted.
 
                     Example:
