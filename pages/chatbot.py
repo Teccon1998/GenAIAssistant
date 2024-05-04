@@ -13,11 +13,19 @@ from streamlit_chat import message
 import os
 from tools.tavily_lookup_tool import tavilySearchTool
 from tools.FileManagementTool import FileTool
+from tools.ProxyCurlLinkedIn import scrapelinkedinprofile
+from tools.JSONIFYTool import file_to_json
+from tools.ProxyCurlJob import scrape_job
 
-
-print( st.session_state["username"])
 #load enviroment variables
 load_dotenv(find_dotenv())
+
+#scrape for linked in profile information
+scrapelinkedinprofile(st.session_state['link'])
+
+#scrape the resume and jsonify it
+file_to_json()
+
 #intialize chat model
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
 #initialize LLM
@@ -38,10 +46,11 @@ def conversationHandler(userInput):
     conversation=conversation_with_summary.predict(input=userInput)
     return conversation
 
+
 def generate_response(query):
     file_tool = FileTool()
     # resumeGenerator = ResumeGeneratorTool()
-    tools = [tavilySearchTool, file_tool]
+    tools = [tavilySearchTool, file_tool,scrape_job]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
@@ -67,7 +76,7 @@ if "chat_message_history" not in st.session_state:
 
 if prompt:
     with st.spinner("Generating Response..."):
-        response=generate_response(prompt)
+        response= generate_response(prompt)
         #Variable that will be displayed to the user when
         formated_response=(
             f"{response}"

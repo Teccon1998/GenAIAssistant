@@ -3,10 +3,8 @@ from pymongo.server_api import ServerApi
 import streamlit as st
 import os
 from dotenv import load_dotenv
-from tools.LinkedInScrape import scrape_with_playwright
 
 load_dotenv()
-
 
 def check_credentials(username_from_client, password_from_client):
     # MongoDB URI without the tlsCAFile option
@@ -31,7 +29,6 @@ def check_credentials(username_from_client, password_from_client):
     if result:
         st.session_state["username"] = username
         st.session_state['link'] = result['link']
-        print(st.session_state['link'])
         st.success(f"Logged in as: {username}")
         st.switch_page("pages/chatbot.py")
     else:
