@@ -16,15 +16,18 @@ from tools.FileManagementTool import FileTool
 from tools.ProxyCurlLinkedIn import scrapelinkedinprofile
 from tools.JSONIFYTool import file_to_json
 from tools.ProxyCurlJob import scrape_job
+from tools.ResumeGenerator import create_enhanced_resume
 
 #load enviroment variables
 load_dotenv(find_dotenv())
 
 #scrape for linked in profile information
-scrapelinkedinprofile(st.session_state['link'])
+# scrapelinkedinprofile(st.session_state['link'])
+
+print(st.session_state['link'])
 
 #scrape the resume and jsonify it
-file_to_json()
+#file_to_json()
 
 #intialize chat model
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2)
@@ -50,7 +53,7 @@ def conversationHandler(userInput):
 def generate_response(query):
     file_tool = FileTool()
     # resumeGenerator = ResumeGeneratorTool()
-    tools = [tavilySearchTool, file_tool,scrape_job]
+    tools = [tavilySearchTool, file_tool,scrape_job,file_to_json,scrapelinkedinprofile,create_enhanced_resume]
     prompt = hub.pull("hwchase17/react")
     print("PROMPT: " + str(prompt))
     llm = OpenAI()
