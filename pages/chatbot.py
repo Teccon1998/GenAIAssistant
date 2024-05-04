@@ -1,7 +1,5 @@
 # This file will implement the chatbot feature
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.schema import AIMessage, HumanMessage
 
 from dotenv import load_dotenv, find_dotenv 
 from langchain.agents import AgentExecutor, create_openai_tools_agent
