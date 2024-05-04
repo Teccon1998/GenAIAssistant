@@ -1,47 +1,41 @@
-import streamlit as st
-import json
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import ChatOpenAI
-from langchain_core.pydantic_v1 import BaseModel, Field
+import os
+import requests
+from dotenv import load_dotenv
 from langchain.tools import tool
-import pydantic
-from typing import List
-import asyncio
-from streamlit import experimental_singleton as stx
 
-class LinkedInJob(BaseModel):
-    job_title: str = Field(description="The name of the job title")
-    location: str = Field(description="The area where the job is located, including work from home options")
-    salary: int = Field(description="The salary amount offered by the job")
-    skills: List[str] = Field(description="List of required skills, including technical, soft, and domain-specific skills")
+load_dotenv()
 
-llm = ChatOpenAI(temperature=0.0)
-structured_llm = llm.with_structured_output(LinkedInJob)
+@tool
+def scrape_linkedin_job(linkedin_job_url: str):
+    """scrape information from LinkedIn jobs,
+    Manually scrape the information from the LinkedIn jobs for information, when data is found stop the execution """
 
-@stx.singleton
-async def scrape_job(urls):
-    """Scrape job information from the given URLs asynchronously."""
-    loader = AsyncChromiumLoader(urls)
-    docs = await loader.load()
-    bs_transformer = BeautifulSoupTransformer()
-    docs_transformed = bs_transformer.transform_documents(docs, tags_to_extract=["div", "span", "li"])
 
-    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(chunk_size=1500, chunk_overlap=0)
-    splits = splitter.split_documents(docs_transformed)
+    api_endpoint = 'https://nubela.co/proxycurl/api/linkedin/job'
+    header_dic = {"Authorization": f'Bearer {os.environ.get("PROXYCURL_API_KEY")}'}
+    response = requests.get(
+        api_endpoint,
+        params={"url": linkedin_job_url},
+        headers=header_dic
+    )    
 
-    if splits:
-        try:
-            prompt = "Extract as much information possible from the job posting page and return an output in JSON format:"
-            input_text = prompt + ' '.join(split.page_content for split in splits[:4])
+    data = response.json()
+    data = {
+        k: v
+        for k, v in data.items()
+        if v not in ([], "", "", None)
+        and k not in ["people_also_viewed", "certifications"]
+    }
+    if data.get("groups"):
+        for group_dict in data.get("groups"):
+            group_dict.pop("profile_pic_url")
 
-            extracted_content = await structured_llm.invoke(input_text)
-            json_data = extracted_content.dict()
-            json_output = json.dumps(json_data, indent=4)
-            return json_output
-        except pydantic.error_wrappers.ValidationError as e:
-            return f"Validation error: {e}"
-    else:
-    else:
-        print("No content found to extract.")
-        return
-        return "No extractable content found."
+    return data
+
+
+if __name__ == "__main__":
+    print(
+        scrape_linkedin_job(
+            linkedin_job_url="https://www.linkedin.com/in/eden-marco/",
+        )
+    )
