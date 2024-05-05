@@ -31,4 +31,7 @@ def scrapelinkedinprofile(linkedin_profile_url: str, mock: bool = True):
 
     # Convert cleaned data back to JSON for output
     json_data = json.dumps(clean_data, indent=4)  # Convert dictionary to JSON string with pretty print
-    return (json_data)
+
+    print(json_data)
+
+    return (clean_data)

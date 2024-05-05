@@ -4,38 +4,60 @@ from tools.ProxyCurlLinkedIn import scrapelinkedinprofile
 from tools.JSONIFYTool import file_to_json
 from tools.ProxyCurlJob import scrape_job
 import streamlit as st
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import LLMChain
+import os
 
 @tool
 def create_enhanced_resume(job_desc_url):
     """
-    Enhances a given resume based on LinkedIn data and job description fetched from URLs.
+    Enhances a given resume based on LinkedIn data and job details fetched from a given URL.
     :param job_desc_url: URL to fetch job description data
-    :return: JSON object with enhanced resume details
+    :return: JSON string with enhanced resume details
     """
-    if 'link' in st.session_state:
-        linkedin_data = scrapelinkedinprofile(st.session_state['link'])
-        resume_data = file_to_json()  # Assuming this function is corrected to actually return JSON data
-        job_description = scrape_job(job_desc_url)  # Assuming this fetches and returns JSON
+    if 'link' not in st.session_state:
+        return json.dumps({"error": "LinkedIn link is not set in session state."})
 
-        # Merge LinkedIn and resume details
-        enhanced_resume = {**resume_data, **linkedin_data}
+    linkedin_data = scrapelinkedinprofile(st.session_state['link'])
+    resume_data = file_to_json() 
+    job_desc_data = scrape_job(job_desc_url)
 
-        # Deduplicate and combine skills from all sources
-        all_skills = set()
-        for source in [linkedin_data, resume_data, job_description]:
-            all_skills.update(source.get('skills', []))
+    # Prepare a comprehensive input for the LLM
+    combined_input = f"""
+    LinkedIn Profile:
+    {json.dumps(linkedin_data, indent=2)}
 
-        enhanced_resume['skills'] = list(all_skills)
+    Resume Details:
+    {json.dumps(resume_data, indent=2)}
 
-        # Include job description summary as an objective
-        if 'summary' in job_description:
-            enhanced_resume['objective'] = job_description['summary']
+    Job Description:
+    {json.dumps(job_desc_data, indent=2)}
 
-        print(enhanced_resume)
-        return json.dumps(enhanced_resume, indent=4)
-    else:
-        print("LinkedIn link is not set in session state.")
-        return {}
+    Instructions:
+    Generate an updated resume that aligns the LinkedIn profile and existing resume with the requirements of the job description.
+    """
 
-# Example usage: Assuming you have a Streamlit widget setting 'link' and a job description URL
-# result = create_enhanced_resume("https://example.com/job_description")
+    # Setup the prompt template
+    prompt_template = PromptTemplate(
+        input_variables=['information'],
+        template="""
+            Given the LinkedIn data, existing resume, and job description below, integrate and update the resume accordingly:
+            {information}
+            Begin.
+        """
+    )
+
+    # Setup LLMChain
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2, openai_api_key=os.getenv('OPENAI_API_KEY'))
+    chain = LLMChain(llm=llm, prompt=prompt_template, verbose=True)
+    result = chain.invoke({"information": combined_input})
+
+    # Parse the LLM output and return JSON string
+    try:
+        updated_resume = json.loads(result.get("text", "{}"))
+        return json.dumps(updated_resume, indent=4)  # Return as JSON string
+    except json.JSONDecodeError:
+        return json.dumps({"error": "Failed to decode JSON", "raw_output": result.get("text")})  # Return error as JSON string
+
+# This function now correctly returns JSON formatted strings.
