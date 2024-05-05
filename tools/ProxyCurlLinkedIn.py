@@ -16,7 +16,7 @@ def scrapelinkedinprofile(linkedin_profile_url: str, mock: bool = False):
         # Real API endpoint
         api_endpoint = "https://nubela.co/proxycurl/api/v2/linkedin"
         header_dic = {"Authorization": f'Bearer {os.environ.get("PROXYCURL_API_KEY")}'}
-        response = requests.get(api_endpoint, params={"url": "https://www.linkedin.com/in/chidansh/","skills":"include"}, headers=header_dic)
+        response = requests.get(api_endpoint, params={"url": linkedin_profile_url,"skills":"include"}, headers=header_dic)
 
     # Convert response to JSON
     data = response.json()

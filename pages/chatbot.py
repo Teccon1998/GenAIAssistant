@@ -21,7 +21,6 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 import streamlit as st
 from streamlit_chat import message
 from tools.tavily_lookup_tool import tavilySearchTool
-from tools.FileManagementTool import FileTool
 from tools.ResumeGenerator import create_enhanced_resume
 
 # Load environment variables
@@ -32,7 +31,6 @@ chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 # Function to generate response
 def generate_response(query:str, chat_session_token):
-    file_tool = FileTool()
     tools = [tavilySearchTool,create_enhanced_resume]
     
     # Create prompt template
