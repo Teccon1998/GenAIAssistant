@@ -5,7 +5,7 @@ import json  # Import json for better handling of json data
 
 load_dotenv()
 
-def scrapelinkedinprofile(linkedin_profile_url: str, mock: bool = True):
+def scrapelinkedinprofile(linkedin_profile_url: str, mock: bool = False):
     """Scrape information from LinkedIn profiles, manually scrape the information from the LinkedIn profile."""
 
     if mock:

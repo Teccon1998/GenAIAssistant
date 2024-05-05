@@ -54,10 +54,7 @@ def create_enhanced_resume(job_desc_url):
     result = chain.invoke({"information": combined_input})
 
     # Parse the LLM output and return JSON string
-    try:
-        updated_resume = json.loads(result.get("text", "{}"))
-        return json.dumps(updated_resume, indent=4)  # Return as JSON string
-    except json.JSONDecodeError:
-        return json.dumps({"error": "Failed to decode JSON", "raw_output": result.get("text")})  # Return error as JSON string
 
+    print(result.get('text'))
+    return result.get('text')
 # This function now correctly returns JSON formatted strings.
