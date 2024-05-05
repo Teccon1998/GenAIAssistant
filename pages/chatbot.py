@@ -69,7 +69,7 @@ def get_session_history(session_id:str) -> BaseChatMessageHistory:
 
 #######################################################################################################
 # USER INTERFACE
-st.header("AI Chat Assistant")
+st.header("BEMA")
 
 # Check for previous user prompts.
 if "user_prompt_history" not in st.session_state:
