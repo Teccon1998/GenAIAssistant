@@ -66,7 +66,7 @@ def tavilySearchTool(name:str)->str:
     )
 
     llm=ChatOpenAI(
-        temperature=0,model_name="gpt-3.5-turbo",openai_api_key=os.environ['OPENAI_API_KEY']
+        temperature=0,model_name="gpt-4-turbo",openai_api_key=os.environ['OPENAI_API_KEY']
     )
 
     chain = LLMChain(llm=llm,prompt=summary_prompt_template,verbose=True)

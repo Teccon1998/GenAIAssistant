@@ -38,7 +38,7 @@ def file_to_json() -> dict:
         template=JSONIFY_prompt_template
     )
 
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.2, openai_api_key=os.getenv('OPENAI_API_KEY'))
+    llm = ChatOpenAI(model="gpt-4-turbo", temperature=0.0, openai_api_key=os.getenv('OPENAI_API_KEY'))
     chain = LLMChain(llm=llm, prompt=prompt_template, verbose=True)
     result = chain.invoke({"information": text})
 
