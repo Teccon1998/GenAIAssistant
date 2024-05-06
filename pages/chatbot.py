@@ -27,7 +27,7 @@ from tools.ResumeGenerator import create_enhanced_resume
 load_dotenv(find_dotenv())
 
 # Initialize chat model
-chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+chat = ChatOpenAI(model="gpt-4-turbo", temperature=0)
 
 # Function to generate response
 def generate_response(query:str, chat_session_token):
@@ -69,7 +69,7 @@ def get_session_history(session_id:str) -> BaseChatMessageHistory:
 
 #######################################################################################################
 # USER INTERFACE
-st.header("BEMA")
+st.header("GenAI Multimodal User Profile Generator")
 
 # Check for previous user prompts.
 if "user_prompt_history" not in st.session_state:
