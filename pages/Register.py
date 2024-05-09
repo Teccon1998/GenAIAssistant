@@ -18,9 +18,10 @@ if "linkedInLink" not in st.session_state:
 def connect_with_server(username, password,firstName,lastName,link):
     # Used to connect with the MongoDB
     uri = os.environ.get('URI_FOR_Mongo')
-
+    
     # Create a new client and connect to the server
-    client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",
+    tlsCAFile = os.getenv('tlsCAFile')
+    client = MongoClient(uri, tlsCAFile=tlsCAFile,
                          server_api=ServerApi('1'))
 
     # Select the database and collection
@@ -96,7 +97,8 @@ with st.form("my_form", clear_on_submit=True):
         uri = os.environ.get('URI_FOR_Mongo')
 
         # Create a new client and connect to the server
-        client = MongoClient(uri, tlsCAFile="C:\\Python312\\Lib\\site-packages\\certifi\\cacert.pem",
+        tlsCAFile = os.getenv('tlsCAFile')
+        client = MongoClient(uri, tlsCAFile=tlsCAFile,
                             server_api=ServerApi('1'))
 
         # Select the database and collection
