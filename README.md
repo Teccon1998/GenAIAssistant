@@ -44,13 +44,17 @@ Streamlit: Used to create the user interface of the application. It provides an 
 `Back-end/AI:`
 
 LangChain: A Python framework used for developing AI applications. It was employed to manage the interactions between the application and the various APIs, as well as to facilitate the decision-making process of the AI.
+
 OpenAI LLM: Used as the main Large Language Model (LLM) for generating responses and processing user prompts. It provides the core AI capabilities for analyzing resumes and generating personalized feedback.
-Data Management:
+
+`Data Management:`
 
 MongoDB: Used for database management, particularly for storing user data such as resumes and LinkedIn profiles. It ensures that data is securely stored and easily accessible for processing by the AI.
-Web Scraping and Data Retrieval:
 
-ProxyCurl API: A tool used to scrape data from LinkedIn profiles and job postings. This API allowed the AI to gather necessary data to tailor resume suggestions accurately.
+`Web Scraping and Data Retrieval:`
+
+ProxyCurl API: A tool used to scrape data from LinkedIn profiles and job postings. This API allowed the AI to gather the necessary data to tailor resume suggestions accurately.
+
 Tavily Search Engine: Implemented to enable the chatbot to perform general web searches and retrieve relevant information from the internet as part of the data enrichment process.
 
 `Key Components:`
