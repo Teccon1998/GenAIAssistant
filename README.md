@@ -38,6 +38,7 @@ That should take you to this page where you can interact with our application.
 Official Technology Stack:
 
 `Front-End:`
+
 Streamlit: Used to create the user interface of the application. It provides an intuitive way to build and deploy the front end of the AI-powered assistant as a web application.
 
 `Back-end/AI:`
