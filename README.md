@@ -52,10 +52,17 @@ Web Scraping and Data Retrieval:
 
 ProxyCurl API: A tool used to scrape data from LinkedIn profiles and job postings. This API allowed the AI to gather necessary data to tailor resume suggestions accurately.
 Tavily Search Engine: Implemented to enable the chatbot to perform general web searches and retrieve relevant information from the internet as part of the data enrichment process.
-Key Components:
+
+`Key Components:`
+
 LangChain: Central framework connecting the AI model with external APIs.
+
 OpenAI LLM: Provides the AI's natural language processing and response generation.
+
 Streamlit: Facilitates the front-end user experience.
+
 MongoDB: Handles secure storage and management of user data.
+
 ProxyCurl API: Enables web scraping for LinkedIn data.
+
 Tavily Search Engine: Assists in retrieving additional contextual data from the web.
