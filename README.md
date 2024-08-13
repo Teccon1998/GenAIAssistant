@@ -36,10 +36,11 @@ That should take you to this page where you can interact with our application.
 
 
 Official Technology Stack:
-Front-end:
 
+`Front-End:`
 Streamlit: Used to create the user interface of the application. It provides an intuitive way to build and deploy the front end of the AI-powered assistant as a web application.
-Back-end/AI:
+
+`Back-end/AI:`
 
 LangChain: A Python framework used for developing AI applications. It was employed to manage the interactions between the application and the various APIs, as well as to facilitate the decision-making process of the AI.
 OpenAI LLM: Used as the main Large Language Model (LLM) for generating responses and processing user prompts. It provides the core AI capabilities for analyzing resumes and generating personalized feedback.
