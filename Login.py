@@ -8,15 +8,16 @@ load_dotenv()
 
 def check_credentials(username_from_client, password_from_client):
     # MongoDB URI without the tlsCAFile option
-    uri = os.environ.get('URI_FOR_MONGO')
+    uri = os.environ.get('URI_FOR_Mongo')
+
 
     # Create MongoClient object with tlsCAFile option
     tlsCAFile=os.environ.get('tlsCAFile')
-    client = MongoClient(uri, tlsCAFile=tlsCAFile)
+    client = MongoClient(uri, tlsCAFile=tlsCAFile, server_api=ServerApi('1'))
 
     # Now you can use the 'client' object to interact with your MongoDB database
     # Select the database and collection
-    database_name = "Elijuwon_Database_499"
+    database_name = "499"
     collection_name = "login_info"
     db = client[database_name]
     collection = db[collection_name]

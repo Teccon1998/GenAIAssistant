@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
-# from tools import JSONIFYTool
+import certifi
 
+# Load environment variables
 load_dotenv()
-
 
 # Ensure session state keys are initialized at the start
 if "username" not in st.session_state:
@@ -14,18 +14,20 @@ if "username" not in st.session_state:
 if "linkedInLink" not in st.session_state:
     st.session_state["linkedInLink"] = "#"
 
-
-def connect_with_server(username, password,firstName,lastName,link):
+def connect_with_server(username, password, firstName, lastName, link):
     # Used to connect with the MongoDB
-    uri = os.environ.get('URI_FOR_Mongo')
-    
-    # Create a new client and connect to the server
-    tlsCAFile = os.getenv('tlsCAFile')
-    client = MongoClient(uri, tlsCAFile=tlsCAFile,
-                         server_api=ServerApi('1'))
+    uri = os.environ.get('URI_FOR_Mongo')  # Load MongoDB URI from the environment
+    tlsCAFile = os.getenv('tlsCAFile')  # Load tlsCAFile from the environment
+
+    # Check if tlsCAFile is loaded correctly
+    if not tlsCAFile:
+        raise ValueError("tlsCAFile is not defined in the environment variables")
+
+    # Create MongoClient object with tlsCAFile
+    client = MongoClient(uri, tlsCAFile=tlsCAFile, server_api=ServerApi('1'))
 
     # Select the database and collection
-    database_name = "Elijuwon_Database_499"
+    database_name = "499"
     collection_name = "login_info"
     db = client[database_name]
     collection = db[collection_name]
@@ -34,9 +36,9 @@ def connect_with_server(username, password,firstName,lastName,link):
     data_to_insert = {
         "username": username,
         "password": password,
-        "firstName":firstName,
-        "lastName":lastName,
-        "link":link
+        "firstName": firstName,
+        "lastName": lastName,
+        "link": link
     }
 
     # Query for the specified username
@@ -51,18 +53,19 @@ def connect_with_server(username, password,firstName,lastName,link):
             # Insert data into the collection
             collection.insert_one(data_to_insert)
 
-            #store username and link for the linked in
+            # Store username and link in session state
             st.session_state['username'] = username
             st.session_state['link'] = link
 
         except Exception as e:
-            st.error("Error inserting data:", e)
+            st.error(f"Error inserting data: {e}")
         finally:
             # Close the MongoDB connection and switch page
             client.close()
-            st.switch_page("pages/chatbot.py")
+            st.success("Registration successful! Redirecting to chatbot page...")
+            st.experimental_rerun()
 
-
+# Main form for registration
 st.title("Register")
 
 with st.form("my_form", clear_on_submit=True):
@@ -73,49 +76,17 @@ with st.form("my_form", clear_on_submit=True):
     st.text("Username:")
     username = st.text_input("Enter username")
     st.text("Password:")
-    password = st.text_input("Enter password")
+    password = st.text_input("Enter password", type="password")
     st.text("LinkedIn Link:")
-    link = st.text_input("Please enter your linkedIn profile page link")
-    register = st.form_submit_button("Register")
-    
-    
-    ##TODO: Add DOCX and TXT
-    ##TODO: make this a part of a mongo user profile: Elijuwon task.
+    link = st.text_input("Please enter your LinkedIn profile page link")
+
+    # Add file upload option
     fileUpload = st.file_uploader("Upload your file:")
 
-    if fileUpload is not None:
-    # To read file as bytes:
-        bytes_data = fileUpload.getvalue()
-        document = {
-        'username': username,
-        'file_name': fileUpload.name,
-        'data': bytes_data,
-        'file_type' : fileUpload.type
-        }
-        
-        # Used to connect with the MongoDB
-        uri = os.environ.get('URI_FOR_Mongo')
+    # Submit button for the form
+    register = st.form_submit_button("Register")
 
-        # Create a new client and connect to the server
-        tlsCAFile = os.getenv('tlsCAFile')
-        client = MongoClient(uri, tlsCAFile=tlsCAFile,
-                            server_api=ServerApi('1'))
-
-        # Select the database and collection
-        database_name = "Elijuwon_Database_499"
-        collection_name = "files_uploaded"
-        db = client[database_name]
-        collection = db[collection_name]
-
-
-        # Insert the document
-        collection.insert_one(document)
-
-    # if fileUpload:
-    #     res = JSONIFYTool.pdf_to_json(fileUpload)
-    #     print(res.get("text"))
-    #     st.write(res.get("text"))
-        
+    # Process the form submission
     if register:
         # Initialize session state keys
         if 'linkedInLink' not in st.session_state:
@@ -123,4 +94,25 @@ with st.form("my_form", clear_on_submit=True):
         if 'username' not in st.session_state:
             st.session_state['username'] = username
 
+        # Handle file upload if any
+        if fileUpload is not None:
+            bytes_data = fileUpload.getvalue()
+            document = {
+                'username': username,
+                'file_name': fileUpload.name,
+                'data': bytes_data,
+                'file_type': fileUpload.type
+            }
+
+            # MongoDB connection to store the file
+            uri = os.getenv('URI_FOR_Mongo')
+            tlsCAFile = os.getenv('tlsCAFile')
+            client = MongoClient(uri, tlsCAFile=tlsCAFile, server_api=ServerApi('1'))
+
+            db = client['499']
+            collection = db['files_uploaded']
+            collection.insert_one(document)
+            client.close()
+
+        # Call the connect_with_server function to store the user data
         connect_with_server(username, password, firstName, lastName, link)
