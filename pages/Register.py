@@ -17,7 +17,8 @@ if "linkedInLink" not in st.session_state:
 def connect_with_server(username, password, firstName, lastName, link):
     # Used to connect with the MongoDB
     uri = os.environ.get('URI_FOR_Mongo')  # Load MongoDB URI from the environment
-    tlsCAFile = os.getenv('tlsCAFile')  # Load tlsCAFile from the environment
+    #tlsCAFile = os.getenv('tlsCAFile')  # Load tlsCAFile from the environment
+    tlsCAFile = certifi.where()
 
     # Check if tlsCAFile is loaded correctly
     if not tlsCAFile:
@@ -106,7 +107,8 @@ with st.form("my_form", clear_on_submit=True):
 
             # MongoDB connection to store the file
             uri = os.getenv('URI_FOR_Mongo')
-            tlsCAFile = os.getenv('tlsCAFile')
+            #tlsCAFile = os.getenv('tlsCAFile')
+            tlsCAFile = certifi.where()
             client = MongoClient(uri, tlsCAFile=tlsCAFile, server_api=ServerApi('1'))
 
             db = client['499']

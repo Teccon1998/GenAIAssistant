@@ -3,6 +3,7 @@ from pymongo.server_api import ServerApi
 import streamlit as st
 import os
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 
@@ -12,7 +13,8 @@ def check_credentials(username_from_client, password_from_client):
 
 
     # Create MongoClient object with tlsCAFile option
-    tlsCAFile=os.environ.get('tlsCAFile')
+    #tlsCAFile=os.environ.get('tlsCAFile')
+    tlsCAFile = certifi.where()
     client = MongoClient(uri, tlsCAFile=tlsCAFile, server_api=ServerApi('1'))
 
     # Now you can use the 'client' object to interact with your MongoDB database
