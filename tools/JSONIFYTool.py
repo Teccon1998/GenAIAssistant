@@ -8,12 +8,14 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
+import certifi
 
 load_dotenv()
 
 def file_to_json() -> dict:
     uri = os.getenv('URI_FOR_MONGO')
-    tlsCAFile = os.getenv('tlsCAFile')
+    #tlsCAFile = os.getenv('tlsCAFile')
+    tlsCAFile = certifi.where()
     client = MongoClient(uri, tlsCAFile=tlsCAFile)
 
     db = client['Elijuwon_Database_499']

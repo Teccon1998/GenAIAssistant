@@ -23,6 +23,11 @@ from streamlit_chat import message
 from tools.tavily_lookup_tool import tavilySearchTool
 from tools.ResumeGenerator import create_enhanced_resume
 
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from tools.ResumeProcessor import process_resume
+import os
+
 # Load environment variables
 load_dotenv(find_dotenv())
 
@@ -67,9 +72,20 @@ def get_session_history(session_id:str) -> BaseChatMessageHistory:
         
     return st.session_state[session_id]
 
+def get_user_resume(username):
+    uri = os.getenv('URI_FOR_Mongo')
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db = client['499']
+    collection = db['files_uploaded']
+    user = collection.find_one({'username': username})
+    if user and 'data' in user:
+        return user['data']
+    return None
+
 #######################################################################################################
 # USER INTERFACE
 st.header("GenAI Multimodal User Profile Generator")
+
 
 # Check for previous user prompts.
 if "user_prompt_history" not in st.session_state:
@@ -85,14 +101,30 @@ if "chat_message_history" not in st.session_state:
 
 chat_session_token = st.session_state.get("chat_session_token")
 
+if "resume_requested" not in st.session_state:
+    st.session_state["resume_requested"] = False
+    st.session_state["resume"] = None
+
 if prompt := st.chat_input("Enter your message"):
     with st.spinner("Generating Response..."):
-        response = generate_response(prompt, chat_session_token)
-        formated_response = f"{response}"
+        resume_requested = False
+        if "show resume" in prompt.lower():
+            st.session_state["resume_requested"] = True
+            username = st.session_state.get('username')
+            resume = get_user_resume(username)
+            if resume:
+                st.session_state["resume"] = resume
+                formated_response = "Here's your resume: "
+            else:
+                formated_response = "No resume found for this user."
+        else:
+            response = generate_response(prompt, chat_session_token)
+            formated_response = f"{response}"
 
         st.session_state["user_prompt_history"].append(prompt)
         st.session_state["chat_message_history"].append(formated_response)
         st.session_state["chat_session_token"] = chat_session_token
+
 
 # if the Streamlit session state is not empty, output responses
 if st.session_state["chat_message_history"]:
@@ -100,3 +132,6 @@ if st.session_state["chat_message_history"]:
         # give each message widget a unique key not based off of output
         message(user_query, is_user=True, key=secrets.token_hex(8))
         message(response, key=secrets.token_hex(8))
+
+if st.session_state["resume_requested"] and st.session_state["resume"]:
+    process_resume(st.session_state["resume"])
